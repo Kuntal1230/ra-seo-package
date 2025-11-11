@@ -79,7 +79,7 @@ export function analyzeSeoContent({
   else if (report.images.total > 0)
     report.tips.push("Some images missing alt text");
   if (report.keywordDensity >= 0.5 && report.keywordDensity <= 2.5) score += 10;
-  else report.tips.push("Keep keyword density between 0.5–2.5%");
+  else report.tips.push("Keep keyword density between 0.5-2.5%");
   if (report.links.internal >= 1) score += 5;
   if (report.links.external >= 1) score += 5;
   if (report.readability > 60) score += 10;

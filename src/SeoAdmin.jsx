@@ -65,6 +65,18 @@ function SeoReportCard({ report, performance }) {
   );
 }
 
+const SeoReport = ({ performance }) => {
+  const record = useRecordContext(); // now it's accessible
+  const [report, setReport] = useState(null);
+
+  useEffect(() => {
+    if (record) setReport(analyzeSeoContent(record));
+  }, [record]);
+
+  if (!report) return null;
+  return <SeoReportCard report={report} performance={performance} />;
+};
+
 export const SeoList = (props) => (
   <List {...props}>
     <Datagrid rowClick="edit">
@@ -78,16 +90,11 @@ export const SeoList = (props) => (
 );
 
 export const SeoEdit = (props) => {
-  const record = useRecordContext();
-  const [report, setReport] = useState(null);
   const [performance, setPerformance] = useState(null);
 
-  useEffect(() => {
-    if (record) setReport(analyzeSeoContent(record));
-  }, [record]);
-
-  const handleRunPageSpeed = async () => {
-    const url = record?.canonical || `https://yourdomain.com/${record?.slug}`;
+  const handleRunPageSpeed = async (record) => {
+    const url =
+      record?.canonical || `${process.env.NEXT_PUBLIC_API_URL}/${record?.slug}`;
     const perf = await runPageSpeedForUrl(url);
     setPerformance(perf);
   };
@@ -97,15 +104,18 @@ export const SeoEdit = (props) => {
       <SimpleForm>
         <TextInput source="title" fullWidth />
         <TextInput source="slug" fullWidth />
+        <TextInput source="canonical" fullWidth />
         <TextInput source="focus_keyword" />
         <TextInput multiline source="meta_description" />
         <TextInput multiline source="content" />
         <BooleanInput source="noindex" />
         <BooleanInput source="nofollow" />
-        <Button variant="contained" onClick={handleRunPageSpeed}>
+
+        <Button variant="contained" onClick={() => handleRunPageSpeed(record)}>
           Run PageSpeed
         </Button>
-        <SeoReportCard report={report} performance={performance} />
+
+        <SeoReport performance={performance} />
       </SimpleForm>
     </Edit>
   );
@@ -116,6 +126,7 @@ export const SeoCreate = () => (
     <SimpleForm>
       <TextInput source="title" fullWidth />
       <TextInput source="slug" fullWidth />
+      <TextInput source="canonical" fullWidth />
       <TextInput source="focus_keyword" fullWidth />
       <TextInput multiline source="meta_description" fullWidth />
       <TextInput multiline source="content" fullWidth />
