@@ -1,0 +1,50 @@
+{
+  "name": "ra-seo-package",
+  "version": "1.0.0",
+  "description": "SEO tools and React Admin resource (meta preview, analysis, PageSpeed integrations)",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build",
+    "lint": "echo 'no lint'",
+    "test": "echo 'no tests'"
+  },
+  "peerDependencies": {
+    "react": "^17 || ^18",
+    "react-dom": "^17 || ^18",
+    "react-admin": "^4 || ^5",
+    "@mui/material": "^5"
+  },
+  "dependencies": {
+    "slugify": "^1.6.5",
+    "reading-time": "^1.2.0",
+    "he": "^1.2.0"
+  },
+  "devDependencies": {
+    "rollup": "^3.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.0",
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-babel": "^6.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kuntal1230/ra-seo-package"
+  },
+  "keywords": [
+    "react-admin",
+    "seo",
+    "page speed",
+    "lighthouse",
+    "ra-seo-package"
+  ],
+  "author": "Kuntal Gupta",
+  "license": "MTI"
+}
