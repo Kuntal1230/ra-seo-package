@@ -12,6 +12,7 @@ import {
   SimpleShowLayout,
   EditButton,
   useRecordContext,
+  useEditController,
 } from "react-admin";
 import {
   Box,
@@ -90,9 +91,18 @@ export const SeoList = (props) => (
 );
 
 export const SeoEdit = (props) => {
+  // Get record from edit controller
+  const { record } = useEditController(props);
+
+  const [report, setReport] = useState(null);
   const [performance, setPerformance] = useState(null);
 
-  const handleRunPageSpeed = async (record) => {
+  useEffect(() => {
+    if (record) setReport(analyzeSeoContent(record));
+  }, [record]);
+
+  const handleRunPageSpeed = async () => {
+    if (!record) return; // safety check
     const url =
       record?.canonical || `${process.env.NEXT_PUBLIC_API_URL}/${record?.slug}`;
     const perf = await runPageSpeedForUrl(url);
@@ -111,11 +121,11 @@ export const SeoEdit = (props) => {
         <BooleanInput source="noindex" />
         <BooleanInput source="nofollow" />
 
-        <Button variant="contained" onClick={() => handleRunPageSpeed(record)}>
+        <Button variant="contained" onClick={() => handleRunPageSpeed()}>
           Run PageSpeed
         </Button>
 
-        <SeoReport performance={performance} />
+        {record && <SeoReportCard report={report} performance={performance} />}
       </SimpleForm>
     </Edit>
   );
