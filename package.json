@@ -15,10 +15,10 @@
     "test": "echo 'no tests'"
   },
   "peerDependencies": {
-    "react": "^17 || ^18",
-    "react-dom": "^17 || ^18",
-    "react-admin": "^4 || ^5",
-    "@mui/material": "^5"
+    "react": ">=17.0.0 <20.0.0",
+    "react-dom": ">=17.0.0 <20.0.0",
+    "react-admin": ">=4.0.0 <6.0.0",
+    "@mui/material": ">=5.0.0 <8.0.0"
   },
   "dependencies": {
     "slugify": "^1.6.5",
@@ -46,5 +46,5 @@
     "ra-seo-package"
   ],
   "author": "Kuntal Gupta",
-  "license": "MTI"
+  "license": "MIT"
 }
