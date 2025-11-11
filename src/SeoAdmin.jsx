@@ -101,6 +101,7 @@ export const SeoEdit = (props) => {
         <TextInput multiline source="meta_description" />
         <TextInput multiline source="content" />
         <BooleanInput source="noindex" />
+        <BooleanInput source="nofollow" />
         <Button variant="contained" onClick={handleRunPageSpeed}>
           Run PageSpeed
         </Button>
@@ -110,7 +111,19 @@ export const SeoEdit = (props) => {
   );
 };
 
-export const SeoCreate = SeoEdit;
+export const SeoCreate = () => (
+  <Create>
+    <SimpleForm>
+      <TextInput source="title" fullWidth />
+      <TextInput source="slug" fullWidth />
+      <TextInput source="focus_keyword" fullWidth />
+      <TextInput multiline source="meta_description" fullWidth />
+      <TextInput multiline source="content" fullWidth />
+      <BooleanInput source="noindex" />
+      <BooleanInput source="nofollow" />
+    </SimpleForm>
+  </Create>
+);
 export const SeoShow = (props) => (
   <Show {...props}>
     <SimpleShowLayout>
