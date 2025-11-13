@@ -5,6 +5,13 @@ export function analyzeSeoContent({
   description,
   content,
   focusKeyword,
+  og_title,
+  og_description,
+  og_image,
+  twitter_title,
+  twitter_description,
+  twitter_image,
+  structured_data,
 } = {}) {
   const report = {
     titleLength: title ? title.length : 0,
@@ -16,13 +23,22 @@ export function analyzeSeoContent({
     links: { internal: 0, external: 0 },
     readability: 0,
     score: 0,
+    og: { title: !!og_title, description: !!og_description, image: !!og_image },
+    twitter: {
+      title: !!twitter_title,
+      description: !!twitter_description,
+      image: !!twitter_image,
+    },
+    schema: !!structured_data,
     tips: [],
   };
 
+  // --- Content-based analysis ---
   if (content) {
     const text = he.decode(content.replace(/<[^>]+>/g, " "));
     const words = text.trim().length ? text.trim().split(/\s+/) : [];
     report.wordCount = words.length;
+
     if (focusKeyword && words.length) {
       const kwCount = words.filter((w) =>
         w.toLowerCase().includes(focusKeyword.toLowerCase())
@@ -51,38 +67,90 @@ export function analyzeSeoContent({
         )
           report.links.internal++;
         else report.links.external++;
-      } catch (e) {
+      } catch {
         report.links.external++;
       }
     });
 
+    // Simple readability formula
     report.readability = Math.max(
       0,
       Math.min(100, 100 - Math.abs(15 - report.wordCount / 100) * 5)
     );
   }
 
-  // Scoring
+  // --- Structured Data Validation ---
+  if (structured_data) {
+    try {
+      JSON.parse(structured_data);
+      report.schema = true;
+    } catch {
+      report.tips.push("Structured Data (JSON-LD) is invalid JSON");
+      report.schema = false;
+    }
+  }
+
+  // --- Scoring system ---
   let score = 0;
-  if (report.titleLength >= 30 && report.titleLength <= 70) score += 15;
-  else report.tips.push("Title should be 30–70 chars");
+
+  // Title & meta
+  if (report.titleLength >= 30 && report.titleLength <= 70) score += 10;
+  else report.tips.push("Title should be 30–70 characters");
+
   if (report.descriptionLength >= 50 && report.descriptionLength <= 160)
     score += 10;
-  else report.tips.push("Meta description should be 50–160 chars");
+  else report.tips.push("Meta description should be 50–160 characters");
+
+  // Content
   if (report.wordCount >= 300) score += 10;
   else report.tips.push("Add more content (>300 words)");
+
+  // Headings
   if (report.headings.h1 === 1) score += 10;
-  else report.tips.push("Exactly one H1 recommended");
+  else report.tips.push("Exactly one H1 is recommended");
   if (report.headings.h2 >= 2) score += 5;
+
+  // Images
   if (report.images.total > 0 && report.images.withAlt === report.images.total)
     score += 10;
   else if (report.images.total > 0)
     report.tips.push("Some images missing alt text");
+
+  // Keyword
   if (report.keywordDensity >= 0.5 && report.keywordDensity <= 2.5) score += 10;
-  else report.tips.push("Keep keyword density between 0.5-2.5%");
+  else report.tips.push("Keep keyword density between 0.5–2.5%");
+
+  // Links
   if (report.links.internal >= 1) score += 5;
   if (report.links.external >= 1) score += 5;
+
+  // Readability
   if (report.readability > 60) score += 10;
+
+  // OG Tags
+  if (report.og.title && report.og.description && report.og.image) score += 5;
+  else
+    report.tips.push(
+      "Add complete Open Graph tags (title, description, image)"
+    );
+
+  // Twitter Tags
+  if (
+    report.twitter.title &&
+    report.twitter.description &&
+    report.twitter.image
+  )
+    score += 5;
+  else
+    report.tips.push(
+      "Add complete Twitter card tags (title, description, image)"
+    );
+
+  // Schema
+  if (report.schema) score += 5;
+  else report.tips.push("Add valid Structured Data (JSON-LD)");
+
   report.score = Math.min(100, score);
+
   return report;
 }

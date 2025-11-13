@@ -22,8 +22,8 @@ import {
   LinearProgress,
   Button,
 } from "@mui/material";
-import { analyzeSeoContent } from "./analyzer";
 import { runPageSpeedForUrl } from "./pagespeedClient";
+import { analyzeSeoFromUrl } from "./analyzeSeoFromUrl";
 
 function SeoReportCard({ report, performance }) {
   if (!report) return null;
@@ -38,6 +38,7 @@ function SeoReportCard({ report, performance }) {
         sx={{ my: 1 }}
       />
       <Typography variant="body2">Words: {report.wordCount}</Typography>
+
       {performance && (
         <>
           <Divider sx={{ my: 1 }} />
@@ -66,18 +67,6 @@ function SeoReportCard({ report, performance }) {
   );
 }
 
-const SeoReport = ({ performance }) => {
-  const record = useRecordContext(); // now it's accessible
-  const [report, setReport] = useState(null);
-
-  useEffect(() => {
-    if (record) setReport(analyzeSeoContent(record));
-  }, [record]);
-
-  if (!report) return null;
-  return <SeoReportCard report={report} performance={performance} />;
-};
-
 export const SeoList = (props) => (
   <List {...props}>
     <Datagrid rowClick="edit">
@@ -98,7 +87,14 @@ export const SeoEdit = (props) => {
   const [performance, setPerformance] = useState(null);
 
   useEffect(() => {
-    if (record) setReport(analyzeSeoContent(record));
+    const handleRunLiveAnalysis = async () => {
+      const url =
+        record?.canonical ||
+        `${process.env.NEXT_PUBLIC_SITE_URL}/${record?.slug}`;
+      const liveReport = await analyzeSeoFromUrl(url, record?.focus_keyword);
+      setReport(liveReport);
+    };
+    if (record) handleRunLiveAnalysis();
   }, [record]);
 
   const handleRunPageSpeed = async () => {
@@ -121,6 +117,46 @@ export const SeoEdit = (props) => {
         <BooleanInput source="noindex" />
         <BooleanInput source="nofollow" />
 
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          Open Graph (Facebook / LinkedIn)
+        </Typography>
+        <TextInput source="og_title" fullWidth />
+        <TextInput source="og_description" fullWidth multiline />
+        <TextInput source="og_image" label="OG Image URL" fullWidth />
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          Twitter Card
+        </Typography>
+        <TextInput source="twitter_title" fullWidth />
+        <TextInput source="twitter_description" fullWidth multiline />
+        <TextInput source="twitter_image" label="Twitter Image URL" fullWidth />
+
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          Structured Data (JSON-LD)
+        </Typography>
+        <TextInput
+          source="structured_data"
+          label="Structured Data (JSON-LD)"
+          multiline
+          fullWidth
+          helperText="Paste valid JSON-LD schema (e.g. Organization, Article, Product)"
+        />
+        <Button
+          variant="outlined"
+          onClick={() =>
+            window.open(
+              `https://search.google.com/test/rich-results?url=${encodeURIComponent(
+                record?.canonical
+              )}`
+            )
+          }
+        >
+          Validate Structured Data
+        </Button>
+
         <Button variant="contained" onClick={() => handleRunPageSpeed()}>
           Run PageSpeed
         </Button>
@@ -136,12 +172,39 @@ export const SeoCreate = () => (
     <SimpleForm>
       <TextInput source="title" fullWidth />
       <TextInput source="slug" fullWidth />
-      <TextInput source="canonical" fullWidth />
       <TextInput source="focus_keyword" fullWidth />
       <TextInput multiline source="meta_description" fullWidth />
-      <TextInput multiline source="content" fullWidth />
+      <TextInput source="canonical" fullWidth />
       <BooleanInput source="noindex" />
       <BooleanInput source="nofollow" />
+
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="h6" gutterBottom>
+        Open Graph (Facebook / LinkedIn)
+      </Typography>
+      <TextInput source="og_title" fullWidth />
+      <TextInput source="og_description" fullWidth multiline />
+      <TextInput source="og_image" label="OG Image URL" fullWidth />
+
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="h6" gutterBottom>
+        Twitter Card
+      </Typography>
+      <TextInput source="twitter_title" fullWidth />
+      <TextInput source="twitter_description" fullWidth multiline />
+      <TextInput source="twitter_image" label="Twitter Image URL" fullWidth />
+
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="h6" gutterBottom>
+        Structured Data (JSON-LD)
+      </Typography>
+      <TextInput
+        source="structured_data"
+        label="Structured Data (JSON-LD)"
+        multiline
+        fullWidth
+        helperText="Paste valid JSON-LD schema (e.g. Organization, Article, Product)"
+      />
     </SimpleForm>
   </Create>
 );
