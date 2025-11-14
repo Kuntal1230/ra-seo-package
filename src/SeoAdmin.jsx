@@ -13,6 +13,8 @@ import {
   EditButton,
   useRecordContext,
   useEditController,
+  useNotify,
+  useRefresh,
 } from "react-admin";
 import {
   Box,
@@ -24,6 +26,7 @@ import {
 } from "@mui/material";
 import { runPageSpeedForUrl } from "./pagespeedClient";
 import { analyzeSeoFromUrl } from "./analyzeSeoFromUrl";
+import SyncIcon from "@mui/icons-material/Sync";
 
 function SeoReportCard({ report, performance }) {
   if (!report) return null;
@@ -67,8 +70,44 @@ function SeoReportCard({ report, performance }) {
   );
 }
 
+const SeoListActions = () => {
+  const notify = useNotify();
+  const refresh = useRefresh();
+
+  const handleSync = async () => {
+    try {
+      const res = await fetch("/api/seo/sync");
+      const data = await res.json();
+      if (data.success) {
+        notify(`✅ Synced ${data.count} URLs successfully`);
+        refresh();
+      } else {
+        notify("Failed to sync URLs", { type: "warning" });
+      }
+    } catch (err) {
+      console.error(err);
+      notify("Error syncing SEO URLs", { type: "error" });
+    }
+  };
+
+  return (
+    <TopToolbar>
+      <Button
+        onClick={handleSync}
+        startIcon={<SyncIcon />}
+        color="primary"
+        variant="contained"
+        sx={{ textTransform: "none", mr: 1 }}
+      >
+        Sync URLs
+      </Button>
+      <CreateButton />
+    </TopToolbar>
+  );
+};
+
 export const SeoList = (props) => (
-  <List {...props}>
+  <List {...props} title="SEO URLs" actions={<SeoListActions />}>
     <Datagrid rowClick="edit">
       <TextField source="id" />
       <TextField source="slug" />
@@ -208,6 +247,7 @@ export const SeoCreate = () => (
     </SimpleForm>
   </Create>
 );
+
 export const SeoShow = (props) => (
   <Show {...props}>
     <SimpleShowLayout>
